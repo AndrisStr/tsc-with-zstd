@@ -1,0 +1,37 @@
+#!/bin/bash
+RUNDIR=./build/bin
+FILEDIR=./build/bin/testdata
+R="results.txt"
+
+for FILE in "$FILEDIR"/*.sam; do
+  printf "%s\n" "$(basename -- "$FILE")" >> $R;
+  printf "%s\n" "$(crc32 "$FILE")" >> $R;
+  FILESIZE=$(stat -c%s "$FILE")
+  printf "%s\n" "$FILESIZE" >> $R;
+  "$RUNDIR"/./tsc -f "$FILE" >> $R;
+  echo "$FILE has been compressed";
+  printf "%s\n" "$(crc32 "$FILE.tsc")" >> $R;
+  FILESIZE=$(stat -c%s "$FILE.tsc")
+  printf "%s\n" "$FILESIZE" >> $R;
+  "$RUNDIR"/./tsc -f -d "$FILE".tsc >> $R;
+  echo "$FILE has been decompressed";
+  rm "$FILE".tsc
+  printf "%s\n" "$(crc32 "$FILE")" >> $R;
+  printf "|\n" >> $R;
+  done
+
+sed -i '/^Compressing/d' $R;
+sed -i '/^Block size/d' $R;
+sed -i '/^Finished/d' $R;
+sed -i '/^Decompressing/d' $R;
+sed -i '/^Read/d' $R;
+sed -i '/^Decompressed [[:digit:]]/d' $R;
+sed -i 's|^Compressed ||g' $R;
+sed -i 's| record(s)$||g' $R;
+sed -i 's|^Wrote ||g' $R;
+sed -i 's| block(s)$||g' $R;
+sed -i 's|^Took ||g' $R;
+sed -i 's| us .*$||g' $R;
+sed -i 's|^Nuccodec CR: ||g' $R;
+
+awk 'BEGIN{RS="|";ORS="\n";FS="\n";OFS=","}{$1=$1;print}' $R > "formatted_results.csv";

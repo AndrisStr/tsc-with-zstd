@@ -4,8 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <zlib.h>
-
+#include <zstdwrap/zstd_zlibwrapper.h>
 #include "log.h"
 
 unsigned char *zlib_compress(unsigned char *in, size_t in_sz, size_t *out_sz) {

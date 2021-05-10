@@ -22,4 +22,5 @@ set(src_files
 add_executable(tsc ${src_files})
 
 target_link_libraries(tsc range)
-target_link_libraries(tsc z)
+target_link_libraries(tsc zstdwrap)
+target_link_libraries(tsc zstd)
